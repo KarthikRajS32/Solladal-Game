@@ -1,8 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AppContext } from "../App"; // Reuse the existing context
 
-const uyirLetters = ["அ","ஆ","இ", "ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ",];
 
-const meiLetters = ["க","ச","ட","ப","த","ற","ங","ஞ","ண","ந","ம","ன","ய","ர","ல","வ","ழ","ள",];
+const uyirLetters = [
+  "அ",
+  "ஆ",
+  "இ",
+  "ஈ",
+  "உ",
+  "ஊ",
+  "எ",
+  "ஏ",
+  "ஐ",
+  "ஒ",
+  "ஓ",
+  "ஔ",
+];
+
+const meiLetters = [
+  "க",
+  "ச",
+  "ட",
+  "ப",
+  "த",
+  "ற",
+  "ங",
+  "ஞ",
+  "ண",
+  "ந",
+  "ம",
+  "ன",
+  "ய",
+  "ர",
+  "ல",
+  "வ",
+  "ழ",
+  "ள",
+];
 
 const uyirMeiCombinations = {
   க: ["க்", "கா", "கி", "கீ", "கு", "கூ", "கெ", "கே", "கை", "கொ", "கோ", "கௌ"],
@@ -28,18 +62,26 @@ const uyirMeiCombinations = {
 const TamilKeyboard = () => {
   const [selectedMei, setSelectedMei] = useState(null);
   const [selectedUyir, setSelectedUyir] = useState(null);
-
+  const { inputText, setInputText } = useContext(AppContext);
 
   const handleMeiClick = (meiLetter) => {
-    setSelectedMei(meiLetter); 
-    setSelectedUyir(null); 
-    };
-
-  
-  const handleUyirClick = (uyirLetter) => {
-    setSelectedUyir(uyirLetter); 
+    setSelectedMei(meiLetter);
+    setInputText((prev) => prev + meiLetter);
   };
 
+  const handleUyirClick = (uyirLetter) => {
+    setSelectedUyir(uyirLetter);
+    setInputText((prev) => prev + uyirLetter);
+  };
+
+  const handleCombinationClick = (combination) => {
+    setInputText((prev) => prev.replace(selectedMei, combination));
+    setSelectedMei(null);
+  };
+
+  const handleDel = () => {
+    setInputText((prev) => prev.slice(0, -1));
+  };
   return (
     <>
       <div className="flex flex-col items-center pt-6">
@@ -50,7 +92,7 @@ const TamilKeyboard = () => {
                 ? uyirMeiCombinations[selectedMei].map((combination, index) => (
                     <button
                       key={index}
-                      onClick={() => handleUyirClick(combination)}
+                      onClick={() => handleCombinationClick(combination)}
                       className="px-2 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
                     >
                       {combination}
@@ -59,7 +101,7 @@ const TamilKeyboard = () => {
                 : uyirLetters.map((letter) => (
                     <button
                       key={letter}
-                      onClick={() => setSelectedUyir(letter)}
+                      onClick={() => handleUyirClick(letter)} // Add Uyir letter to the input text
                       className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
                     >
                       {letter}
@@ -73,7 +115,7 @@ const TamilKeyboard = () => {
               {meiLetters.map((meiLetter) => (
                 <button
                   key={meiLetter}
-                  onClick={() => handleMeiClick(meiLetter)}
+                  onClick={() => handleMeiClick(meiLetter)} // Select the Mei letter
                   className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
                 >
                   {meiLetter}
@@ -85,14 +127,22 @@ const TamilKeyboard = () => {
       </div>
 
       <div className="flex justify-between items-center px-4 w-full max-w-4xl mx-auto">
-             <div className="w-8"></div>
+        <div className="w-8"></div>
+
         <button className="px-10 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer">
           சரிபார்
         </button>
+
         <div className="w-10 cursor-pointer bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer">
-          <img className="w-8 h-8 " src="./delete.png" alt="delete" />
+          <img
+            onClick={() => handleDel()}
+            className="w-8 h-8"
+            src="./delete.png"
+            alt="delete"
+          />
         </div>
       </div>
+      <p>{inputText}</p>
     </>
   );
 };
