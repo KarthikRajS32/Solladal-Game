@@ -1,6 +1,5 @@
-import React, { useState, useContext } from "react";
-import { AppContext } from "../App"; // Reuse the existing context
-
+import React, { useContext } from "react";
+import { AppContext } from "../App";
 
 const uyirLetters = [
   "அ",
@@ -21,8 +20,8 @@ const meiLetters = [
   "க",
   "ச",
   "ட",
-  "ப",
   "த",
+  "ப",
   "ற",
   "ங",
   "ஞ",
@@ -60,48 +59,46 @@ const uyirMeiCombinations = {
 };
 
 const TamilKeyboard = () => {
-  const [selectedMei, setSelectedMei] = useState(null);
-  const [selectedUyir, setSelectedUyir] = useState(null);
-  const { inputText, setInputText } = useContext(AppContext);
+  const {
+    board,
+    currAttempt,
+    handleKeyPress,
+    handleCombination,
+    handleDelete,
+    handleCheckWord,
+    isGameOver,
+    isSuccess,
+  } = useContext(AppContext);
 
   const handleMeiClick = (meiLetter) => {
-    setSelectedMei(meiLetter);
-    setInputText((prev) => prev + meiLetter);
+    handleKeyPress(meiLetter, true);
   };
 
-  const handleUyirClick = (uyirLetter) => {
-    setSelectedUyir(uyirLetter);
-    setInputText((prev) => prev + uyirLetter);
-  };
-
-  const handleCombinationClick = (combination) => {
-    setInputText((prev) => prev.replace(selectedMei, combination));
-    setSelectedMei(null);
-  };
-
-  const handleDel = () => {
-    setInputText((prev) => prev.slice(0, -1));
-  };
   return (
     <>
       <div className="flex flex-col items-center pt-6">
         <div className="flex justify-between w-full max-w-4xl mb-6">
+          {/* Uyir letters or Uyir-Mei combinations */}
           <div className="w-1/2">
             <div className="grid grid-cols-4 gap-2">
-              {selectedMei && uyirMeiCombinations[selectedMei]
-                ? uyirMeiCombinations[selectedMei].map((combination, index) => (
+              {currAttempt.lastMeiPos !== null
+                ? uyirMeiCombinations[
+                    board[currAttempt.attempt][currAttempt.lastMeiPos]
+                  ]?.map((combination, index) => (
                     <button
                       key={index}
-                      onClick={() => handleCombinationClick(combination)}
+                      onClick={() =>
+                        handleCombination(combination, currAttempt.lastMeiPos)
+                      }
                       className="px-2 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
                     >
                       {combination}
                     </button>
                   ))
-                : uyirLetters.map((letter) => (
+                : uyirLetters.map((letter, index) => (
                     <button
-                      key={letter}
-                      onClick={() => handleUyirClick(letter)} // Add Uyir letter to the input text
+                      key={index}
+                      onClick={() => handleKeyPress(letter)}
                       className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
                     >
                       {letter}
@@ -110,12 +107,13 @@ const TamilKeyboard = () => {
             </div>
           </div>
 
+          {/* Mei letters */}
           <div className="w-1/2 pl-2">
             <div className="grid grid-cols-6 gap-2">
               {meiLetters.map((meiLetter) => (
                 <button
                   key={meiLetter}
-                  onClick={() => handleMeiClick(meiLetter)} // Select the Mei letter
+                  onClick={() => handleMeiClick(meiLetter)}
                   className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
                 >
                   {meiLetter}
@@ -126,23 +124,30 @@ const TamilKeyboard = () => {
         </div>
       </div>
 
+      {/* Control Buttons */}
       <div className="flex justify-between items-center px-4 w-full max-w-4xl mx-auto">
         <div className="w-8"></div>
 
-        <button className="px-10 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer">
+        <button
+          onClick={handleCheckWord}
+          disabled={currAttempt.letterPos !== 5 || isGameOver || isSuccess}
+          className={`px-10 py-2 shadow shadow-black rounded-md ${
+            currAttempt.letterPos === 5 && !isGameOver && !isSuccess
+              ? "bg-gray-300 hover:bg-gray-200 cursor-pointer"
+              : "bg-gray-100 cursor-not-allowed"
+          }`}
+        >
           சரிபார்
         </button>
 
-        <div className="w-10 cursor-pointer bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer">
-          <img
-            onClick={() => handleDel()}
-            className="w-8 h-8"
-            src="./delete.png"
-            alt="delete"
-          />
-        </div>
+        <button
+          onClick={handleDelete}
+          disabled={isGameOver || isSuccess}
+          className="w-10 h-10 flex items-center justify-center bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
+        >
+          <img className="w-8 h-8" src="./delete.png" alt="delete" />
+        </button>
       </div>
-      <p>{inputText}</p>
     </>
   );
 };
