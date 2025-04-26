@@ -125,7 +125,7 @@ const TamilKeyboard = () => {
       </div>
 
       {/* Control Buttons */}
-      <div className="flex justify-between items-center px-4 w-full max-w-4xl mx-auto">
+      <div className="flex justify-between items-center pb-6 px-4 w-full max-w-4xl mx-auto">
         <div className="w-8"></div>
 
         <button
