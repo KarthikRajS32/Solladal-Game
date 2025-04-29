@@ -1,7 +1,7 @@
 import React, { useState, createContext, useEffect } from "react";
 import Header from "./Components/Header";
 import Board from "./Components/Board";
-import boardDefault from "./Components/Words";
+import boardDefault from "./Components/BoardDefault";
 import TamilKeyboard from "./Components/TamilKeyboard";
 import tamilWords from "./Components/TamilWords";
 
@@ -22,7 +22,13 @@ const App = () => {
     letterPos: 0,
     lastMeiPos: null,
   });
-
+  const [letterStatus, setLetterStatus] = useState([
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+  ]);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -34,14 +40,11 @@ const App = () => {
   }, []);
 
   const handleKeyPress = (keyVal, isMei = false) => {
-    if (isGameOver || isSuccess) return; // Don't allow typing after success or game over
-
+    if (isGameOver || isSuccess) return;
     let attempt = currAttempt.attempt;
     let letterPos = currAttempt.letterPos;
-
-    if (lockedRows[attempt]) return; // Prevent typing if row is locked
-
-    if (letterPos > 4) return; // Max 5 letters
+    if (lockedRows[attempt]) return;
+    if (letterPos > 4) return;
 
     const newBoard = [...board];
     newBoard[attempt][letterPos] = keyVal;
@@ -67,17 +70,13 @@ const App = () => {
 
   const handleDelete = () => {
     if (isGameOver || isSuccess) return;
-
     let attempt = currAttempt.attempt;
     let letterPos = currAttempt.letterPos;
-
     if (lockedRows[attempt]) return;
-
     if (letterPos === 0) return;
 
     const newBoard = [...board];
     const deletePos = letterPos - 1;
-
     newBoard[attempt][deletePos] = "";
     setBoard(newBoard);
 
@@ -89,33 +88,70 @@ const App = () => {
     });
   };
 
-  const handleCheckWord = () => {
-    if (currAttempt.letterPos !== 5) return; // Only check if full word
+ const handleCheckWord = () => {
+   if (currAttempt.letterPos !== 5) return; // Only check after 5 letters
 
-    const currentWord = board[currAttempt.attempt].join(""); // Join the current row letters
+   const currentWord = board[currAttempt.attempt].join(""); // User's guess
+   const correctWord = randomWord; // Correct word
 
-    if (currentWord === randomWord) {
-      setIsSuccess(true);
-      const newLockedRows = [...lockedRows];
-      newLockedRows[currAttempt.attempt] = true;
-      setLockedRows(newLockedRows);
-      return;
-    } else {
-      const newLockedRows = [...lockedRows];
-      newLockedRows[currAttempt.attempt] = true;
-      setLockedRows(newLockedRows);
+   // Array to store letter statuses
+   const newStatus = ["", "", "", "", ""];
+   const usedIndices = new Set(); // Track which correct letters have been matched
 
-      if (currAttempt.attempt >= 4) {
-        setIsGameOver(true);
-      } else {
-        setCurrAttempt({
-          attempt: currAttempt.attempt + 1,
-          letterPos: 0,
-          lastMeiPos: null,
-        });
-      }
-    }
-  };
+   // First pass: Check for EXACT matches in correct position (GREEN)
+   for (let i = 0; i < 5; i++) {
+     if (currentWord[i] === correctWord[i]) {
+       newStatus[i] = "correct"; // Exact match → GREEN
+       usedIndices.add(i); // Mark this position as used
+     }
+   }
+
+   // Second pass: Check for EXACT matches in wrong positions (YELLOW)
+   for (let i = 0; i < 5; i++) {
+     if (newStatus[i] === "") {
+       // Skip already marked letters
+       for (let j = 0; j < 5; j++) {
+         // If the letter matches exactly and hasn't been used yet
+         if (!usedIndices.has(j) && currentWord[i] === correctWord[j]) {
+           newStatus[i] = "present"; // Exact match but wrong position → YELLOW
+           usedIndices.add(j); // Mark this correct letter as used
+           break;
+         }
+       }
+     }
+   }
+
+   // Third pass: Mark remaining letters as ABSENT (GRAY)
+   for (let i = 0; i < 5; i++) {
+     if (newStatus[i] === "") {
+       newStatus[i] = "absent"; // No match → GRAY
+     }
+   }
+
+   // Update the board status
+   const updatedStatuses = [...letterStatus];
+   updatedStatuses[currAttempt.attempt] = newStatus;
+   setLetterStatus(updatedStatuses);
+
+   // Lock the row after checking
+   const newLockedRows = [...lockedRows];
+   newLockedRows[currAttempt.attempt] = true;
+   setLockedRows(newLockedRows);
+
+   // Check if the word is correct
+   if (currentWord === correctWord) {
+     setIsSuccess(true);
+   } else if (currAttempt.attempt >= 4) {
+     setIsGameOver(true);
+   } else {
+     // Move to the next attempt
+     setCurrAttempt({
+       attempt: currAttempt.attempt + 1,
+       letterPos: 0,
+       lastMeiPos: null,
+     });
+   }
+ };
 
   return (
     <div>
@@ -132,18 +168,19 @@ const App = () => {
           lockedRows,
           isGameOver,
           isSuccess,
+          letterStatus,
         }}
       >
         <Board />
         <TamilKeyboard />
         {isSuccess && (
           <div className="text-green-600 text-center font-bold text-2xl mt-4">
-            வெற்றி பெற்றீர்கள்! 🎉
+            வாழ்த்துக்கள்! சரியான விடை..
           </div>
         )}
         {isGameOver && (
           <div className="text-red-600 text-center font-bold text-2xl mt-4">
-            வீணாகிவிட்டது! 😢
+            முயற்சிக்கு வாழ்த்துக்கள்...
           </div>
         )}
       </AppContext.Provider>
@@ -152,4 +189,3 @@ const App = () => {
 };
 
 export default App;
-

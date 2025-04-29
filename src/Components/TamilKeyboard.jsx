@@ -76,10 +76,10 @@ const TamilKeyboard = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center pt-6">
-        <div className="flex justify-between w-full max-w-4xl mb-6">
-          {/* Uyir letters or Uyir-Mei combinations */}
-          <div className="w-1/2">
+      <div className="flex flex-col items-center pt-6 px-2 sm:px-4 md:px-6">
+        <div className="flex flex-col sm:flex-row justify-between w-full max-w-5xl mb-6 gap-4">
+          {/* Uyir or Uyirmei */}
+          <div className="w-full sm:w-1/2">
             <div className="grid grid-cols-4 gap-2">
               {currAttempt.lastMeiPos !== null
                 ? uyirMeiCombinations[
@@ -90,7 +90,7 @@ const TamilKeyboard = () => {
                       onClick={() =>
                         handleCombination(combination, currAttempt.lastMeiPos)
                       }
-                      className="px-2 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
+                      className="px-2 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer text-sm sm:text-base md:text-lg"
                     >
                       {combination}
                     </button>
@@ -99,7 +99,7 @@ const TamilKeyboard = () => {
                     <button
                       key={index}
                       onClick={() => handleKeyPress(letter)}
-                      className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
+                      className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer text-sm sm:text-base md:text-lg"
                     >
                       {letter}
                     </button>
@@ -107,14 +107,14 @@ const TamilKeyboard = () => {
             </div>
           </div>
 
-          {/* Mei letters */}
-          <div className="w-1/2 pl-2">
+          {/* Mei Letters */}
+          <div className="w-full sm:w-1/2 pl-0 sm:pl-2">
             <div className="grid grid-cols-6 gap-2">
               {meiLetters.map((meiLetter) => (
                 <button
                   key={meiLetter}
                   onClick={() => handleMeiClick(meiLetter)}
-                  className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
+                  className="px-4 py-2 bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer text-sm sm:text-base md:text-lg"
                 >
                   {meiLetter}
                 </button>
@@ -125,13 +125,13 @@ const TamilKeyboard = () => {
       </div>
 
       {/* Control Buttons */}
-      <div className="flex justify-between items-center pb-6 px-4 w-full max-w-4xl mx-auto">
-        <div className="w-8"></div>
+      <div className="flex justify-between items-center pb-6 px-2 sm:px-4 w-full max-w-5xl mx-auto">
+        <div className="w-8 sm:w-10"></div>
 
         <button
           onClick={handleCheckWord}
           disabled={currAttempt.letterPos !== 5 || isGameOver || isSuccess}
-          className={`px-10 py-2 shadow shadow-black rounded-md ${
+          className={`px-6 sm:px-8 md:px-10 py-2 shadow shadow-black rounded-md text-sm sm:text-base md:text-lg ${
             currAttempt.letterPos === 5 && !isGameOver && !isSuccess
               ? "bg-gray-300 hover:bg-gray-200 cursor-pointer"
               : "bg-gray-100 cursor-not-allowed"
@@ -143,9 +143,13 @@ const TamilKeyboard = () => {
         <button
           onClick={handleDelete}
           disabled={isGameOver || isSuccess}
-          className="w-10 h-10 flex items-center justify-center bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
+          className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer"
         >
-          <img className="w-8 h-8" src="./delete.png" alt="delete" />
+          <img
+            className="w-6 h-6 sm:w-8 sm:h-8"
+            src="./delete.png"
+            alt="delete"
+          />
         </button>
       </div>
     </>
