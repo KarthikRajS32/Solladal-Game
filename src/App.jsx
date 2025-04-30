@@ -174,7 +174,6 @@ const handleCheckWord = () => {
         }}
       >
         <Board />
-        <TamilKeyboard />
         {isSuccess && (
           <div className="text-green-600 text-center font-bold text-2xl mt-4 pb-4">
             வாழ்த்துக்கள்! <br /> சரியான விடை : {randomWord}
@@ -186,6 +185,8 @@ const handleCheckWord = () => {
             <span className="text-green-600">சரியான விடை : {randomWord}</span>
           </div>
         )}
+        <TamilKeyboard />
+        
       </AppContext.Provider>
     </div>
   );
