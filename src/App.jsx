@@ -4,6 +4,8 @@ import Board from "./Components/Board";
 import boardDefault from "./Components/BoardDefault";
 import TamilKeyboard from "./Components/TamilKeyboard";
 import tamilWords from "./Components/TamilWords";
+import "./index.css";
+import GraphemeSplitter from "grapheme-splitter";
 
 export const AppContext = createContext();
 
@@ -88,70 +90,70 @@ const App = () => {
     });
   };
 
- const handleCheckWord = () => {
-   if (currAttempt.letterPos !== 5) return; // Only check after 5 letters
+const handleCheckWord = () => {
+  if (currAttempt.letterPos !== 5) return;
 
-   const currentWord = board[currAttempt.attempt].join(""); // User's guess
-   const correctWord = randomWord; // Correct word
+  const splitter = new GraphemeSplitter();
+  const currentWordArr = splitter.splitGraphemes(
+    board[currAttempt.attempt].join("")
+  );
+  const correctWordArr = splitter.splitGraphemes(randomWord);
 
-   // Array to store letter statuses
-   const newStatus = ["", "", "", "", ""];
-   const usedIndices = new Set(); // Track which correct letters have been matched
+  const newStatus = ["", "", "", "", ""];
+  const usedIndices = new Set();
 
-   // First pass: Check for EXACT matches in correct position (GREEN)
-   for (let i = 0; i < 5; i++) {
-     if (currentWord[i] === correctWord[i]) {
-       newStatus[i] = "correct"; // Exact match → GREEN
-       usedIndices.add(i); // Mark this position as used
-     }
-   }
+  // Step 1: Correct match (green)
+  for (let i = 0; i < 5; i++) {
+    if (currentWordArr[i] === correctWordArr[i]) {
+      newStatus[i] = "correct";
+      usedIndices.add(i);
+    }
+  }
 
-   // Second pass: Check for EXACT matches in wrong positions (YELLOW)
-   for (let i = 0; i < 5; i++) {
-     if (newStatus[i] === "") {
-       // Skip already marked letters
-       for (let j = 0; j < 5; j++) {
-         // If the letter matches exactly and hasn't been used yet
-         if (!usedIndices.has(j) && currentWord[i] === correctWord[j]) {
-           newStatus[i] = "present"; // Exact match but wrong position → YELLOW
-           usedIndices.add(j); // Mark this correct letter as used
-           break;
-         }
-       }
-     }
-   }
+  // Step 2: Present in word but wrong place (yellow)
+  for (let i = 0; i < 5; i++) {
+    if (newStatus[i] === "") {
+      for (let j = 0; j < 5; j++) {
+        if (
+          !usedIndices.has(j) &&
+          currentWordArr[i] === correctWordArr[j] &&
+          currentWordArr[j] !== correctWordArr[j]
+        ) {
+          newStatus[i] = "present";
+          usedIndices.add(j);
+          break;
+        }
+      }
+    }
+  }
 
-   // Third pass: Mark remaining letters as ABSENT (GRAY)
-   for (let i = 0; i < 5; i++) {
-     if (newStatus[i] === "") {
-       newStatus[i] = "absent"; // No match → GRAY
-     }
-   }
+  // Step 3: Not in word at all (gray)
+  for (let i = 0; i < 5; i++) {
+    if (newStatus[i] === "") {
+      newStatus[i] = "absent";
+    }
+  }
 
-   // Update the board status
-   const updatedStatuses = [...letterStatus];
-   updatedStatuses[currAttempt.attempt] = newStatus;
-   setLetterStatus(updatedStatuses);
+  const updatedStatuses = [...letterStatus];
+  updatedStatuses[currAttempt.attempt] = newStatus;
+  setLetterStatus(updatedStatuses);
 
-   // Lock the row after checking
-   const newLockedRows = [...lockedRows];
-   newLockedRows[currAttempt.attempt] = true;
-   setLockedRows(newLockedRows);
+  const newLockedRows = [...lockedRows];
+  newLockedRows[currAttempt.attempt] = true;
+  setLockedRows(newLockedRows);
 
-   // Check if the word is correct
-   if (currentWord === correctWord) {
-     setIsSuccess(true);
-   } else if (currAttempt.attempt >= 4) {
-     setIsGameOver(true);
-   } else {
-     // Move to the next attempt
-     setCurrAttempt({
-       attempt: currAttempt.attempt + 1,
-       letterPos: 0,
-       lastMeiPos: null,
-     });
-   }
- };
+  if (currentWordArr.join("") === correctWordArr.join("")) {
+    setIsSuccess(true);
+  } else if (currAttempt.attempt >= 4) {
+    setIsGameOver(true);
+  } else {
+    setCurrAttempt({
+      attempt: currAttempt.attempt + 1,
+      letterPos: 0,
+      lastMeiPos: null,
+    });
+  }
+};
 
   return (
     <div>
@@ -174,13 +176,14 @@ const App = () => {
         <Board />
         <TamilKeyboard />
         {isSuccess && (
-          <div className="text-green-600 text-center font-bold text-2xl mt-4">
-            வாழ்த்துக்கள்! சரியான விடை..
+          <div className="text-green-600 text-center font-bold text-2xl mt-4 pb-4">
+            வாழ்த்துக்கள்! <br /> சரியான விடை : {randomWord}
           </div>
         )}
         {isGameOver && (
-          <div className="text-red-600 text-center font-bold text-2xl mt-4">
-            முயற்சிக்கு வாழ்த்துக்கள்...
+          <div className="text-red-600 text-center font-bold text-2xl mt-4 pb-4">
+            முயற்சிக்கு வாழ்த்துக்கள்... <br /> 
+            <span className="text-green-600">சரியான விடை : {randomWord}</span>
           </div>
         )}
       </AppContext.Provider>

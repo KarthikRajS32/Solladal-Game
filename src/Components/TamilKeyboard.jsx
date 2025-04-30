@@ -125,8 +125,10 @@ const TamilKeyboard = () => {
       </div>
 
       {/* Control Buttons */}
-      <div className="flex justify-between items-center pb-6 px-2 sm:px-4 w-full max-w-5xl mx-auto">
-        <div className="w-8 sm:w-10"></div>
+      <div className="flex justify-evenly items-center pb-6 px-2 sm:px-4 w-full max-w-5xl mx-auto">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-gray-300 shadow shadow-black rounded-md hover:bg-gray-200 cursor-pointer">
+          ஃ
+        </div>
 
         <button
           onClick={handleCheckWord}
