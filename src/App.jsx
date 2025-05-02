@@ -38,7 +38,6 @@ const App = () => {
     const randomIndex = Math.floor(Math.random() * tamilWords.length);
     const word = tamilWords[randomIndex];
     setRandomWord(word);
-    console.log(word);
   }, []);
 
   const handleKeyPress = (keyVal, isMei = false) => {
